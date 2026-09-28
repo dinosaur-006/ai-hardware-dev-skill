@@ -2,7 +2,7 @@
 
 本文件把 ai-hardware-dev 各环节文件里的可复制 AI 提示词模板汇总在一起，分两部分：
 
-- **第一部分：高频通用模板（全文可直接复制）**——跨环节反复使用、最值得先存的 12 个。
+- **第一部分：高频通用模板（全文可直接复制）**——跨环节反复使用、最值得先存的 18 个（含 V2 项目执行系统模板）。
 - **第二部分：全量模板索引**——按环节列出全部模板名与使用场景，完整全文在各环节文件（`references/NN-*.md`）的「可复制 AI 提示词模板」一节。
 - **训练营原文模板**（7 条，逐字摘录自第 1/2 课）见 `references/camp-notes.md`「训练营可复用提示词模板」。
 
@@ -136,6 +136,73 @@
 核心功能：<3-5 条>
 ```
 
+### 项目执行系统类（V2）
+
+**T13. 多角色模式启动（AI 硬件团队，说"我要做产品"时用）**
+
+```text
+我要做一个 AI 硬件产品：<一句话描述>。请以「AI 硬件团队」多角色模式驱动这个项目：
+1. 先按 core/ai-hardware-team.md 的分工表，声明本次要启用的角色与顺序：Product Manager → Hardware Architect → Electrical Engineer → Firmware Engineer → QA Engineer → Manufacturing Engineer；
+2. 每个角色只处理自己职责内的环节文件（PM 管 00/需求翻译，架构师管 01，电气管 03/04/05，固件管 02/07/08，QA 管各验收清单与 11，制造管 05/10）；
+3. 角色之间通过交付物交接（product-contract → 选型结论 → 原理图/PCB/BOM → 固件/烧录证据 → 真机验收记录），交接物必须落盘到项目文件，不允许口头交接；
+4. 每个角色交付前先读自己的环节文件的验收清单，逐项自检后再交给下一个角色；
+5. 任何角色不得替其他角色做决策（如 QA 不能替 PM 改需求），产品方向与取舍最终由我拍板。
+先从 Product Manager 开始：请读 references/00-direction-and-definition.md 和 references/00-product-translator.md，帮我产出产品合同与需求翻译表。
+```
+
+**T14. 初始化项目状态（project-state，启动任何项目必用）**
+
+```text
+请按 core/project-state.md 的 project-memory.json 模板，为我的新项目 <项目名> 初始化项目状态文件：
+1. 字段：project_name=<项目名>、current_stage="00/12"、product_contract、board_contract 指向对应文件路径；
+2. decisions_made 初始为空，undecided 列出此刻所有未定项（含"谁决策"：等用户 / 等实验）；
+3. risks 列出起步阶段我能预见的风险（如板级事实未确认、模型跑不动），每项给等级和缓解；
+4. 把初始化结果写盘为 <项目目录>/docs/project-memory.json，并在回复里复述：项目现在在哪、定了什么、还有什么没定。
+```
+
+**T15. 每完成一个环节就更新状态（project-state，纪律核心）**
+
+```text
+我刚完成 <环节名>（第 <N> 环节）的验收清单，结果：<各验收项 PASS/FAIL 摘要，FAIL 项写原因>。
+请更新项目状态文件 docs/project-memory.json：current_stage 改为 "<N+1>/12"；把本环节确定的决策追加进 decisions_made（引用对应 decision-record 的 id）；把本环节新出现的未定项和风险同步进 undecided / risks；把本次验收结果追加进 verification_log（含证据级别：编译通过/烧录成功/日志正常/真机验收）。
+更新后，用一句话列出"从上一次更新到这次"的差异（阶段变化、新增决策、新增风险），再给下一步建议。
+```
+
+**T16. 需求翻译（人话→工程规格，00 之后 01 之前）**
+
+```text
+我要做一个 <一句话产品描述>。请按 references/00-product-translator.md 的需求翻译表模板，把这句话翻译成工程规格：
+1. 逐条拆解功能（输入/处理/输出/交互/通信/供电/状态反馈）；
+2. 每个功能给技术需求与硬件映射（如"语音输入 → 麦克风 → 模拟 MEMS+ADC 或数字 I2S 麦克风"）；
+3. 每行标优先级（P0 必需 / P1 想要 / P2 以后），并列出"未确定项"（如：本地 AI 还是云端 AI？电源用 USB 还是锂电池？）；
+4. 不要直接跳到具体芯片/开发板——选型留给下一环节（01）；
+5. 翻译完用一段话复述你的工程理解，把"需要我决策的未确定项"单独列出来问我。
+```
+
+**T17. 生成决策记录（decision-record，关键选型/方案决策后留痕）**
+
+```text
+我们刚才决定：<结论，如：选 ESP32-S3 N16R8 模组>。
+背景：<为什么走到这个选择，如：需要 8MB PSRAM 跑 1MB 内模型、16MB Flash 装固件+模型>。
+备选方案：<列出认真比较过的备选与理由，如：N8R2（内存不够跑该模型）、树莓派（功耗与成本过高、启动慢）>。
+取舍理由：<权衡点，如：成本/功耗/生态/学习成本>。
+影响面：<这个决策影响哪些后续环节，如：03 原理图电源方案、07 固件内存预算、10 外壳尺寸>。
+请按 core/decision-record.md 的模板把这条决策固化写入 docs/decisions/ 目录，并同步到 project-memory.json 的 decisions_made。
+```
+
+**T18. 排障后沉淀失败知识库（failure-knowledge-base，每次排障后必用）**
+
+```text
+刚解决了一个硬件问题，请按 core/failure-knowledge-base.md 的条目格式把它结构化沉淀：
+症状：<一句话，可检索>
+可能原因（带概率估计与依据）：<如：供电不足 60%（曾 3 次复现）；虚焊 30%（目检可疑）；固件 bug 10%（日志未见）>
+验证方法：<可操作步骤，如：万用表测 3.3V 对 GND、示波器看波形>
+解决：<最终修复方式>
+已发生次数：<本次是第几次>
+相关环节：<如：06 焊接调试 / 08 烧录>
+请写入 docs/failure-knowledge-base.md（与 core 模板同格式），并在 project-memory.json 的 risks 里把已缓解的风险勾掉。
+```
+
 ## 第二部分：全量模板索引
 
 | 环节 | 模板 | 使用场景 | 完整全文 |
@@ -143,7 +210,10 @@
 | 00 方向定义 | A 评估产品想法 | 起步：评估想法可行性 | `references/00-direction-and-definition.md` |
 | 00 | B 生成产品合同 | 把想法写成 product-contract.md | 同上 |
 | 00 | C 砍 MVP 边界 | 防止范围失控 | 同上 |
-| 01 选型 | A 帮我选型 | 六维对比五个平台 | `references/01-platform-selection.md` |
+| 00b 需求翻译 | A 人话→规格翻译 | 想法转工程规格（T16） | `references/00-product-translator.md` |
+| 00b | B 反向确认 | AI 复述工程理解待确认 | 同上 |
+| 00b | C 缺口提问 | 未确定项补齐 | 同上 |
+| 01 选型 | A 帮我选型（四级分级） | MCU 级 AI 硬件主线 Level1-4 选型 | `references/01-platform-selection.md` |
 | 01 | B 评估模型能否跑 | 模型 vs PSRAM/Flash 预算 | 同上 |
 | 01 | C 板级核对 | 买板前后核对规格 | 同上 |
 | 02 环境 | A 环境体检 | 装完环境逐项自检 | `references/02-environment-setup.md` |
@@ -154,10 +224,12 @@
 | 03 | B 外设接线表 | 生成接线核对表 | 同上 |
 | 03 | C 原理图审查员 | 画完自查 ERC 风险 | 同上 |
 | 03 | D 读数据手册辅助 | 看芯片手册重点 | 同上 |
+| 03 | E 原理图防幻觉检查 | 逐项检查（电源/LDO/去耦/晶振/USB/天线/地） | 同上 |
 | 04 PCB | A 布局分区方案 | 生成布局分区 | `references/04-pcb-layout.md` |
 | 04 | B 设计规则参数表 | 填 EDA 规则 | 同上 |
 | 04 | C PCB 审查 | 走线完自查 | 同上 |
 | 04 | D 发厂前检查清单 | 导出 Gerber 前核对 | 同上 |
+| 04 | E PCB 防幻觉检查 | 逐项检查（DRC 通过≠正确） | 同上 |
 | 05 打样采购 | A BOM 拆分工 | SMT 贴 vs 手贴 | `references/05-manufacturing-and-sourcing.md` |
 | 05 | B 阻容取值审查 | 核对被动元件取值 | 同上 |
 | 05 | C 下单前自检 | 防止拍错板 | 同上 |
@@ -181,6 +253,17 @@
 | 11 排障 | A 日志喂 AI | 贴日志分析（最高频） | `references/11-troubleshooting.md`（T1） |
 | 11 | B 现象描述模板 | 硬件症状五层排查 | 同上 |
 | 11 | C 硬件 vs 软件二分 | 不知道哪边问题 | 同上 |
+| 11 | D 排障后沉淀 FKB | 把排障结论结构化沉淀（T18） | 同上 + `core/failure-knowledge-base.md` |
+| 项目状态 | A 初始化项目状态 | 启动项目建 project-memory.json（T14） | `core/project-state.md` |
+| 项目状态 | B 每环节后更新状态 | 完成验收后更新+列差异（T15） | 同上 |
+| 项目状态 | C 状态汇报 | "项目现在到哪了" | 同上 |
+| 决策记录 | A 生成决策记录 | 选型/方案决策留痕（T17） | `core/decision-record.md` |
+| 决策记录 | B 决策回顾 | 中途回顾关键决策是否仍成立 | 同上 |
+| 失败知识库 | A 排障后沉淀 | 症状/概率原因/验证/解决/次数（T18） | `core/failure-knowledge-base.md` |
+| 失败知识库 | B 查询匹配 | 新症状先查 FKB 按概率排序 | 同上 |
+| 失败知识库 | C 概率校准 | 新证据后更新概率与次数 | 同上 |
+| AI 团队 | A 多角色模式启动 | "我要做产品"时启用（T13） | `core/ai-hardware-team.md` |
+| AI 团队 | B-G 六角色卡 | PM/架构/电气/固件/QA/制造各一卡 | 同上 |
 | 板级合同 | A 起草新板合同 | 新板建 contract.json | `board-reference.md`（T5） |
 | 板级合同 | B 实测验证清单 | 建合同后实测 | 同上 |
 | 板级合同 | C 冲突处理 | 文档与实物不符 | 同上 |

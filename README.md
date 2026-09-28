@@ -2,8 +2,9 @@
 
 一个跨 Agent 可用的 Skill 包：让 AI Agent 引导你（零基础、AI 辅助开发 / vibecoding）完成 AI 硬件产品的完整开发闭环——方向定义、芯片选型、环境搭建、原理图、PCB、打样、焊接、固件（含边缘 AI 推理）、烧录、软硬件联调、产品化与故障排查。
 
-- **板级无关**：主体是通用方法论 + ESP32-S3 平台知识；EasyInput V2.0 只是参考案例，任何开发板都适用（见 `board-reference.md` 的新板建合同方法）。
+- **板级无关**：主体是通用方法论 + MCU 级 AI 硬件主线知识（Level1 ESP32-S3 入门 → Level2 STM32+NPU → Level3 树莓派 → Level4 Jetson）；EasyInput V2.0 只是参考案例，任何开发板都适用（见 `board-reference.md` 的新板建合同方法）。
 - **单环节可用**：只想烧录、只想联调、只想画板时，直接读对应环节文件即可。
+- **项目执行系统**（V2）：项目状态（project-memory.json）、决策记录、失败知识库、AI 硬件团队多角色模式，让 Skill 不只是"流程导航"而是"项目执行系统"。
 - **每环节自带**：目标与通过标准、可复制命令（Windows 优先）、可复制 AI 提示词模板、常见坑、验收清单。
 
 ## 目录结构
@@ -16,19 +17,25 @@ ai-hardware-dev/
 ├── board-reference.md                # 参考案例板 EasyInput V2.0 + 新板建板级知识合同方法
 ├── prompt-templates.md               # 各环节可复制 AI 提示词模板汇总
 ├── resources.md                      # 分类资源清单（官方/GitHub/中文社区/训练营，链接已核验）
+├── core/                             # V2 项目执行系统
+│   ├── project-state.md              # 项目状态：project-memory.json 模板 + 每环节更新纪律
+│   ├── decision-record.md            # 决策记录：关键选型/方案取舍留痕模板
+│   ├── failure-knowledge-base.md     # 失败知识库：症状/概率原因/验证/解决/次数
+│   └── ai-hardware-team.md           # AI 硬件团队多角色模式（PM→架构→电气→固件→QA→制造）
 └── references/
     ├── 00-direction-and-definition.md     # 方向确定与产品定义
-    ├── 01-platform-selection.md           # 平台/芯片选型（ESP32-S3 主线）
+    ├── 00-product-translator.md           # 需求翻译层：人话→工程规格（V2 新增）
+    ├── 01-platform-selection.md           # MCU 级 AI 硬件主线选型（Level1-4 四级分级）
     ├── 02-environment-setup.md            # 环境搭建
-    ├── 03-schematic-design.md             # 原理图设计
-    ├── 04-pcb-layout.md                   # PCB 布局布线
+    ├── 03-schematic-design.md             # 原理图设计（含 AI 防幻觉检查表）
+    ├── 04-pcb-layout.md                   # PCB 布局布线（含 AI 防幻觉检查表）
     ├── 05-manufacturing-and-sourcing.md   # 打样与元器件采购
     ├── 06-soldering-and-hardware-debug.md # 焊接与硬件调试
     ├── 07-firmware-ai.md                  # 固件开发（含 AI 推理）
     ├── 08-flashing-and-debugging.md       # 烧录与调试
     ├── 09-software-hardware-integration.md# 软硬件联调
     ├── 10-productization.md               # 产品化
-    ├── 11-troubleshooting.md              # 故障排查
+    ├── 11-troubleshooting.md              # 故障排查（结构化失败知识库）
     └── camp-notes.md                      # 训练营资料速览（WaytoAGI 第七期）
 ```
 
@@ -49,9 +56,11 @@ ai-hardware-dev/
 ## 使用前必读
 
 1. **新板先建板级知识合同**：买到新开发板后，按 `board-reference.md` 第二部分花 30-60 分钟建立 `board-contract.json`（可让 AI 代填，有模板），后续所有开发都以合同为准，避免按通用教程猜引脚。
-2. **从 00 开始走一遍全流程**：第一个项目建议按 00→11 顺序推进，每环节验收清单打勾后再进入下一环节。
-3. **单独调用**：只想做某个环节（如烧录）时，直接读对应文件，无需走完全程。
-4. **证据分级**：编译通过 ≠ 烧录成功 ≠ 真机验收。每步以真机表现为准。
+2. **启动项目先建项目状态**：按 `core/project-state.md` 初始化 `project-memory.json`（项目名、当前阶段、已定决策、未定项、风险、验证记录）；每完成一个环节的验收清单后让 AI 更新状态并列出差异。
+3. **从 00 开始走一遍全流程**：第一个项目建议按 00（→需求翻译）→01→11 顺序推进，每环节验收清单打勾后再进入下一环节。
+4. **单独调用**：只想做某个环节（如烧录）时，直接读对应文件，无需走完全程。
+5. **证据分级**：编译通过 ≠ 烧录成功 ≠ 真机验收。每步以真机表现为准。
+6. **说"我要做产品"**：读 `core/ai-hardware-team.md`，让 AI 以多角色团队模式（PM→硬件架构→电气→固件→QA→制造）驱动全程。
 
 ## 许可
 
