@@ -82,14 +82,16 @@
 
 > 训练营资料默认可公开、仅限非商业使用；使用约定与逐字提示词详见 `references/camp-notes.md`。
 
-## 五、本地可复用素材（非链接）
+## 五、本地可复用素材（非链接，路径按本机实际环境填写）
 
-| 路径 | 用途 |
+> 以下素材的本机绝对路径不写入本包（公开仓库读者不可见），仅说明素材位置与用途；使用时按自己机器的实际目录替换。
+
+| 素材 | 位置与用途 |
 | --- | --- |
-| `D:\esp\v5.4.1`（含 activate-idf541.ps1）与 `D:\esp\v5.5.5` | 本机已装的 ESP-IDF 双版本；激活与镜像配置见 02 环节 |
-| `D:\硬件耍耍\Waytoagi\easyinput-board-cy\references\board-contract.json` | EasyInput V2.0 板级合同权威副本（board-reference.md 的数据来源） |
-| `D:\硬件耍耍\Waytoagi\easyinput-beatbox\docs\course\` | 第 3 课讲义与 PPT 分页稿（camp-notes.md 补充素材） |
-| `D:\硬件耍耍\Waytoagi\easyinput-beatbox\docs\host-protocol.md` / `midi-protocol.md` | 串口/协议设计思想参考（09 环节借鉴，不复制正文） |
+| ESP-IDF 多版本（含 activate-idf*.ps1 激活脚本） | 按本机实际安装目录使用（IDF_PATH / IDF_TOOLS_PATH 指向纯英文目录即可）；版本激活与国内镜像配置见 02 环节 |
+| EasyInput V2.0 板级合同权威副本 | EasyInput 参考仓库（easyinput-board-cy）的 `references/board-contract.json`；本包 `board-reference.md` 已摘录要点，不复制正文 |
+| 训练营第 3 课讲义与 PPT 分页稿 | 训练营飞书文档第 3 课（见上表第四节）/ 本地讲义目录；camp-notes.md 的补充素材 |
+| 串口宿主协议 / MIDI 协议设计参考 | EasyInput 鼓机参考仓库 docs/ 下的协议文档（09 环节借鉴设计思路，不复制正文） |
 
 ## 使用注意
 

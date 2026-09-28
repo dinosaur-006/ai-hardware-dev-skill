@@ -31,9 +31,9 @@
 **T2. 编译报错回贴排查（环境搭建 02 环节）**
 
 ```text
-我在用 ESP-IDF 5.4.1 编译一个 ESP32-S3 工程，工程路径是 D:\eb-build\my-device（纯英文）。我已经做了这些环境设置：PYTHONUTF8=1、IDF_CCACHE_ENABLE=0、组件镜像走 components.espressif.cn。下面是 idf.py build 的完整报错日志（含最后 80 行）：
+我在用 ESP-IDF 5.4.1 编译一个 ESP32-S3 工程，工程路径是 <你的项目目录（纯英文路径、无空格无中文）>/my-device。我已经做了这些环境设置：PYTHONUTF8=1、IDF_CCACHE_ENABLE=0、组件镜像走 components.espressif.cn。下面是 idf.py build 的完整报错日志（含最后 80 行）：
 <粘贴报错>
-我的板级合同（引脚/PSRAM/Flash/外设）见 docs/board-reference.md：
+我的板级合同（引脚/PSRAM/Flash/外设）见 docs/board-contract.json：
 <粘贴板级合同要点>
 请按"错误根因 → 证据 → 最小修复命令"三步回答；不要一次改五个地方，先给最可能的那一条。
 ```
@@ -51,7 +51,7 @@
 **T4. 让 AI 先读板级合同再写代码（环境搭建 02 环节）**
 
 ```text
-接下来我们要在这块板上写固件，请先阅读我的板级合同文件 docs/board-reference.md（里面写了 SoC、模组 N16R8、PSRAM、引出脚分配、按键/LED/音频引脚、串口下载方式）。在写任何代码之前，先复述你对"哪些脚已被占用、哪些脚空闲、下载模式怎么进"的理解，跟我确认无误后再开始。
+接下来我们要在这块板上写固件，请先阅读我的板级合同文件 docs/board-contract.json（里面写了 SoC、模组 N16R8、PSRAM、引出脚分配、按键/LED/音频引脚、串口下载方式）。在写任何代码之前，先复述你对"哪些脚已被占用、哪些脚空闲、下载模式怎么进"的理解，跟我确认无误后再开始。
 ```
 
 **T5. 为新板建板级知识合同（board-reference.md）**
@@ -71,7 +71,7 @@
 我在 Windows PowerShell 下用 <idf.py flash / esptool.py> 烧录 ESP32-S3，命令是：<粘贴完整命令>。
 报错原文：
 <粘贴 esptool 完整输出，尤其是 Connecting failed / A fatal error occurred / Hash of data does not match>
-我的板子是 EasyInput V2.0（无 RESET 键，开机状态短按 BOOT 进入下载模式，退出要重上电）。
+我的板子是 <板名>，下载模式进/退方式以板级合同为准：<粘贴 board-contract.json 的 boot.enter / boot.exit / independent_user_reset_button 字段>。
 请按"端口/驱动 → 下载模式 → 供电/线 → 分区与 flash 模式 → 固件本身"的顺序，列出最可能的 3 个原因和对应验证命令，不要让我瞎试。
 ```
 
@@ -225,6 +225,9 @@
 | 03 | C 原理图审查员 | 画完自查 ERC 风险 | 同上 |
 | 03 | D 读数据手册辅助 | 看芯片手册重点 | 同上 |
 | 03 | E 原理图防幻觉检查 | 逐项检查（电源/LDO/去耦/晶振/USB/天线/地） | 同上 |
+| 03a 面包板原型 | A 生成面包板接线方案 | 画板前先在面包板验证最小接线 | `references/03a-breadboard-prototype.md` |
+| 03a | B 原型验收清单生成 | 逐外设点亮、功耗粗测的验收判据 | 同上 |
+| 03a | C 原型→原理图迁移清单 | 面包板连接翻译成原理图网络 | 同上 |
 | 04 PCB | A 布局分区方案 | 生成布局分区 | `references/04-pcb-layout.md` |
 | 04 | B 设计规则参数表 | 填 EDA 规则 | 同上 |
 | 04 | C PCB 审查 | 走线完自查 | 同上 |
