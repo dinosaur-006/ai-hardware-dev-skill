@@ -1,38 +1,63 @@
 # 01. 平台/芯片选型（Platform & Chip Selection）
 
-全流程的第 2 步。根据产品合同选择芯片平台。**主线：ESP32-S3**（AI 硬件入门的默认第一选择）；树莓派 / K210 / STM32 / Jetson 作为速览分支，只在明确需求下切换。输入：`docs/product-contract.md`；输出：一行选型结论 + 采购板型确认。
+全流程的第 2 步。根据产品合同选择芯片平台。**主线：MCU 级 AI 硬件开发主线（四级分级）**——从零基础入门到重算力边缘，按"算力量级 / 系统形态"分 Level 1–4 逐级升级，**不要把"AI 硬件"等同于"ESP32"**：ESP32-S3 只是入门第一站（Level 1）。输入：`docs/product-contract.md`；输出：一行选型结论（含 Level 等级）+ 采购板型确认。
 
 ## 目标与通过标准
 
 - 目标：用"算力、外设、AI 能力、成本、功耗、生态"六维对比，为产品选到够用且不后悔的平台。
 - 通过标准：
-  - 能说出选型结论与一句话理由。
-  - 主线程项目明确落在 ESP32-S3，并确认板子内存/Flash/引脚余量够跑 MVP。
-  - 特殊需求（重算力视觉 / 工业强实时 / 超低功耗视觉唤醒）能正确转到速览分支。
+  - 能说出选型结论与一句话理由，并说清本项目落在四级主线的哪一级（Level 1–4）。
+  - 零基础 / 无明确重算力需求的项目默认落在 Level 1（ESP32-S3），并确认板子内存/Flash/引脚余量够跑 MVP。
+  - 需求超出 Level 1 时，能正确路由到 Level 2（STM32+NPU）/ Level 3（树莓派 Linux）/ Level 4（Jetson）；特殊需求（超低功耗视觉唤醒）知道备注 K210。
   - 已确认采购渠道有现货（见 `05-manufacturing-and-sourcing.md`）。
 
-## 选型决策树（条件路由）
+## MCU 级 AI 硬件开发主线（四级分级）
 
-1. 产品需要 WiFi/BLE 联网 + 音频/按键/传感器类实时交互（语音助手、鼓机、传感器盒子、桌面小机器人）→ **ESP32-S3（主线）**
-2. 要跑 Linux 全栈 + Python AI（大模型对话、复杂摄像头视觉、多进程服务）→ **树莓派（Pi 4/5）**
-3. 要电池供电的超低功耗视觉唤醒（关键词/图像唤醒、一次性拍照识别）→ **K210**
-4. 工业级、强实时控制、特殊外设接口（PLC、电机、汽车电子）→ **STM32**
-5. 重算力机器人 / 自动驾驶原型（目标检测、SLAM）→ **Jetson**
+AI 硬件不是"只有 ESP32"一条路，而是一条按算力量级与系统形态逐级上升的四级主线。**零基础一律从 Level 1 起步**，需求涨上来再按本节末尾的"升级路线"上跳，不要一上来就买最贵的板。
 
-主线 ESP32-S3 的选择理由：双核 240MHz 带向量指令（SIMD，加速神经网络与信号处理）、内置 2.4GHz WiFi + BLE、原生 USB、TinyML 生态成熟（TFLite Micro / ESP-DL / ESP-NN）、板级成本约 ¥30-80、社区与中文教程量最大、且是训练营教具（EasyInput V2.0 即 ESP32-S3）。
+| 级别 | 平台 | 定位 | AI 能力形态 | 一句话场景 |
+| --- | --- | --- | --- | --- |
+| **Level 1（入门主线）** | ESP32-S3 | MCU + WiFi/BLE，零基础第一选择 | MCU 级 TinyML：TFLite Micro / ESP-DL / ESP-NN（KB–MB 级量化模型） | 语音助手、鼓机、传感器盒子、桌面小机器人 |
+| **Level 2（MCU 升级）** | STM32 + NPU（如 STM32N6 系列） | 从 MCU 往上一步：带 NPU 的工业 MCU | NPU 硬件视觉加速 + ST Edge AI / Cube.AI，工业生态强 | 需要更强视觉/AI 加速、又要工业级实时与生态 |
+| **Level 3（Linux 全栈）** | Raspberry Pi（Pi 4/5） | 微型 Linux 电脑 | Python AI 全栈：TensorFlow / PyTorch、摄像头视觉、大模型对话 | 复杂摄像头视觉、多进程服务、LLM 对话原型 |
+| **Level 4（重算力边缘）** | Jetson | AI 边缘计算模组/开发板 | 完整 AI 框架，GPU 数十~数百 TOPS 级 | 机器人 / 自动驾驶原型、目标检测、SLAM |
 
-## 六维对比表
+> 特殊需求备注：超低功耗电池视觉唤醒（关键词/图像唤醒、一次性拍照识别）可看 K210，但生态较窄、中文资料少，非该场景不要选。
 
-| 维度 | ESP32-S3（主线） | 树莓派 | K210 | STM32 | Jetson |
-| --- | --- | --- | --- | --- | --- |
-| 定位 | MCU + WiFi/BLE | 微型 Linux 电脑 | 视觉 MCU | 工业 MCU | AI 边缘计算板 |
-| 算力 | 双核 240MHz + 向量指令 | 四核 1.5-2.4GHz | 双核 400MHz + KPU | 按系列（Cortex-M 等） | GPU 数百 GFLOPS 级 |
-| AI 方式 | TinyML：TFLite Micro / ESP-DL，KB-MB 级模型 | TensorFlow / PyTorch，MB 级 | KPU 硬件加速量化 CNN | ST Edge AI / Cube.AI | 完整 AI 框架 |
-| 联网 | 内置 WiFi/BLE | 网口/外接 | 无（需外接） | 无（需外接） | 内置 WiFi |
-| 典型推理功耗 | <300mW | 3-5W+ | mW 级 | 低 | 5-15W+ |
-| 板级成本 | ¥30-80 | ¥300-700 | ¥40-100 | ¥30-150 | ¥1000+ |
-| 开发难度（AI 辅助） | 低：生态大、教程多、训练营教具 | 中：Linux 环境 | 中：生态较窄 | 中高：工具链重 | 高：环境复杂 |
-| 适合场景 | 语音/传感/按键类实时硬件 | Python 全栈原型、摄像头 | 电池视觉唤醒 | 工业/强实时 | 视觉机器人原型 |
+**Level 1 为什么是零基础第一站**：ESP32-S3 双核 240MHz 带向量指令（SIMD，加速神经网络与信号处理）、内置 2.4GHz WiFi + BLE、原生 USB、TinyML 生态成熟（TFLite Micro / ESP-DL / ESP-NN）、板级成本约 ¥30-80、社区与中文教程量最大、且是训练营教具（EasyInput V2.0 即 ESP32-S3）。
+
+## 选型四级路由（先问量级，再落 Level）
+
+先回答两个问题：**① 需要什么算力量级？② 需要裸 MCU 实时系统，还是 Linux 全栈系统？** 再按下表落到 Level：
+
+1. WiFi/BLE 联网 + 音频/按键/传感器类实时交互，模型在 KB–MB 级（语音唤醒、关键词识别、传感器分类、鼓机）→ **Level 1：ESP32-S3**
+2. MCU 级实时，但视觉/AI 推理需要硬件 NPU 加速，或要工业级生态（STM32 工具链、工业外设）→ **Level 2：STM32N6 等 STM32+NPU**
+3. 要跑 Linux 全栈 + Python AI（大模型对话、复杂摄像头视觉、多进程服务、需要 pip 装库）→ **Level 3：树莓派（Pi 4/5）**
+4. 重算力机器人 / 自动驾驶原型（实时目标检测、SLAM、多路摄像头）→ **Level 4：Jetson**
+
+## 升级路线：从 Level 1 起步，按需上跳
+
+主线用法是 **Level 1 起步 → 需求升级时按 Level 2 / 3 / 4 迁移**，不是一次选到底。判定"何时升级"：
+
+- 模型体积 **> 1MB**，或需要 Linux 生态（Python / pip / 多进程 / 大模型对话）→ 升到 **Level 3（树莓派）**。
+- 需要 **NPU 视觉加速**（图像推理帧率/精度要求明显超出 ESP32-S3 软件向量指令），但仍要 MCU 级实时与工业生态 → 升到 **Level 2（STM32+NPU）**。
+- 需要 **重算力**（多路视觉、SLAM、机器人实时感知）→ 升到 **Level 4（Jetson）**。
+- 不要反过来：把树莓派当 MCU 用（实时按键/音频节拍）；实时交互仍应留给 Level 1/2，Linux 板可用串口/BLE 与 MCU 板配合。
+
+## 六维对比表（按四级主线重排）
+
+| 维度 | Level 1：ESP32-S3 | Level 2：STM32+NPU（STM32N6） | Level 3：树莓派 Pi 4/5 | Level 4：Jetson |
+| --- | --- | --- | --- | --- |
+| 定位 | MCU + WiFi/BLE（入门主线） | 带 NPU 的工业 MCU | 微型 Linux 电脑 | AI 边缘计算板 |
+| 算力 | 双核 240MHz + 向量指令 | Cortex-M 级 MCU + 片上 NPU | 四核 1.5-2.4GHz | GPU/加速器，数十~数百 TOPS 级 |
+| AI 方式 | TinyML：TFLite Micro / ESP-DL / ESP-NN，KB-MB 级模型 | NPU 硬件加速视觉，ST Edge AI / Cube.AI | TensorFlow / PyTorch，MB–十 MB 级 | 完整 AI 框架（CUDA 生态） |
+| 联网 | 内置 WiFi/BLE | 无（需外接模块） | 网口/外接 WiFi | 内置 WiFi |
+| 典型推理功耗 | <300mW | mW~低功耗 | 3-5W+ | 5-15W+ |
+| 板级成本 | ¥30-80 | ¥100-300 级（按 NPU 系列） | ¥300-700 | ¥1000+ |
+| 开发难度（AI 辅助） | 低：生态大、教程多、训练营教具 | 中高：STM32 工具链 + NPU 部署 | 中：Linux 环境 | 高：环境复杂、需散热 |
+| 适合场景 | 语音/传感/按键类实时硬件 | 工业视觉加速、强实时控制 | Python 全栈原型、摄像头、LLM 对话 | 视觉机器人原型、SLAM |
+
+> K210 不进四级主表：仅"超低功耗电池视觉唤醒"这一特殊需求可用（KPU 硬件加速量化 CNN、mW 级功耗、板级约 ¥40-100），但生态较窄、中文资料少，非该场景不要选。
 
 ## 可复制操作与命令
 
@@ -45,10 +70,10 @@
 
 ## 可复制 AI 提示词模板
 
-模板 A：帮我选型（主模板）
+模板 A：帮我选型（主模板，按四级路由）
 
 ```text
-我正在做一个 <产品描述>。我是零基础、AI 辅助开发。请按"算力、外设需求、AI 能力、成本、功耗、生态"六个维度，帮我对比 ESP32-S3 / 树莓派 / K210 / STM32 / Jetson，给出明确推荐和理由；如果推荐 ESP32-S3，请说明该选哪个模组（如 N16R8）和理由。
+我正在做一个 <产品描述>。我是零基础、AI 辅助开发。请先判断两个问题：① 需要什么算力量级（KB-MB 级 TinyML / 需要 NPU 视觉加速 / Linux Python 全栈 / 重算力机器人）；② 需要裸 MCU 实时系统还是 Linux 全栈。然后按"MCU 级 AI 硬件开发四级主线"（Level 1 ESP32-S3 / Level 2 STM32+NPU 如 STM32N6 / Level 3 树莓派 / Level 4 Jetson）推荐我该落在哪一级，并按"算力、外设需求、AI 能力、成本、功耗、生态"六维说明理由；如果落在 Level 1（ESP32-S3），请说明该选哪个模组（如 N16R8）和理由。
 ```
 
 模板 B：评估模型能否在 ESP32-S3 上跑
@@ -74,11 +99,12 @@
 
 ## 验收清单
 
-- [ ] 已按六维对比表完成选型
-- [ ] 选型结论一句话已写入 `docs/product-contract.md`（如"选 ESP32-S3：WiFi/BLE 内置、TinyML 生态成熟、约 ¥50、训练营教具"）
-- [ ] 已确认模组规格（优先 N16R8）够放 MVP 模型
+- [ ] 已按六维对比表完成选型，并写明本项目落在四级主线的哪一级（Level 1–4）
+- [ ] 选型结论一句话已写入 `docs/product-contract.md`（如"Level 1 选 ESP32-S3：WiFi/BLE 内置、TinyML 生态成熟、约 ¥50、训练营教具"）
+- [ ] 若落在 Level 1，已确认模组规格（优先 N16R8）够放 MVP 模型
 - [ ] 已确认板子引脚余量（外设清单 vs 引出脚）
-- [ ] 已检查特殊需求是否需要切换分支（树莓派/K210/STM32/Jetson）
+- [ ] 已按"何时升级"判定自查：模型 >1MB / 需要 Linux 生态是否该升 Level 3；需要 NPU 视觉加速是否该升 Level 2；需要重算力是否该升 Level 4
+- [ ] 已确认超低功耗视觉唤醒等特殊需求是否需备注 K210
 - [ ] 已确认采购渠道有现货
 - [ ] 已为当前板建立/引用板级知识合同（见 `board-reference.md`）
 
@@ -89,4 +115,7 @@
 - ESP32-S3 产品概述（ESP 硬件设计指南，中文）：https://docs.espressif.com/projects/esp-hardware-design-guidelines/zh_CN/latest/esp32s3/product-overview.html （官方）
 - ESP32 vs 树莓派：IoT/AI/嵌入式与 PCB 项目平台对比（含 TinyML vs Edge AI 对比表）：https://jlcpcb.com/blog/esp32-vs-raspberry-pi （社区/英文）
 - ESP32 与 STM32 上运行 TinyML 的区别与选择（中文）：https://www.eet-china.com/mp/a495207.html （社区/中文）
+- STM32N6 产品页（Level 2：带 NPU 的 STM32，官方）：https://www.st.com/en/microcontrollers-microprocessors/stm32n6-series.html （官方）
+- Raspberry Pi 官网（Level 3：Pi 4/5 产品页）：https://www.raspberrypi.com/ （官方）
+- NVIDIA Jetson 官网（Level 4：边缘 AI 模组）：https://developer.nvidia.com/embedded/jetson-modules （官方）
 - 训练营第 1 课（教具 EasyInput V2.0 即 ESP32-S3）：https://waytoagi.feishu.cn/wiki/YUfhwbwdUiYXtYkCru7cfKaGnWb （训练营）
