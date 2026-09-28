@@ -16,7 +16,7 @@
 
 ### 0. 通用原则（先读，避免后面所有坑）
 
-- **工程一律放纯英文路径**：如 `D:\eb-build`、`D:\projects\my-device`。不要放在 `桌面\硬件\`、`D:\硬件耍耍\...` 这类含中文/空格路径下做编译（详见"常见坑"1/2/3）。
+- **工程一律放纯英文路径**：如 `D:\eb-build`、`D:\projects\my-device`。不要放在 `桌面\硬件\`、含中文/空格路径下做编译（详见"常见坑"1/2/3）。
 - **每个新开的 PowerShell 窗口都要重新激活一次 ESP-IDF**——IDF 的环境变量只在当前窗口有效，不会全局持久化。
 - 国内网络：IDF/工具链用 `dl.espressif.cn`，组件用 `components-file.espressif.cn`，Arduino 板包用 jihulab 镜像，不要硬刚 GitHub。
 
@@ -41,20 +41,22 @@ macOS/Linux：macOS 看 `/dev/cu.usbserial-*` 或 `/dev/cu.usbmodem*`；Linux �
 - **图形安装器 / EIM（推荐新手）**：从 `dl.espressif.cn` 下载 ESP-IDF 安装器（在线或离线包 zst），按向导选 ESP-IDF v5.4.x 或 v5.5.x，安装路径保持纯英文（如 `D:\esp`）。
 - **离线包（本机已采用）**：把 `esp-idf-v5.4.1.zip` / `esp-idf-v5.5.5.zip` 解压到 `D:\esp\v5.4.1`、`D:\esp\v5.5.5`，工具统一放 `D:\esp\tools`（`IDF_TOOLS_PATH`），先在每个版本目录里跑一次 `install.ps1` 装工具链。
 
-**激活脚本（关键，每个新 PowerShell 窗口先跑这段）**——本机已验证可用的 v5.4.1 激活：
+**激活脚本（关键，每个新 PowerShell 窗口先跑这段）**——v5.4.1 激活示例（路径换成你的实际安装目录）：
 
 ```powershell
-# --- 激活 ESP-IDF v5.4.1（纯英文路径窗口中执行）---
-$env:IDF_PATH = 'D:\esp\v5.4.1'
-$env:IDF_TOOLS_PATH = 'D:\esp\tools'
+# --- 激活 ESP-IDF v5.4.1（请在纯英文路径窗口中执行；<你的 IDF 安装路径> 替换为实际目录）---
+$env:IDF_PATH = '<你的 IDF 安装路径>\v5.4.1'
+$env:IDF_TOOLS_PATH = '<你的工具目录>'  # 如 D:\esp\tools
 # 国内镜像：组件注册表与组件文件存储走乐鑫中国 CDN
 $env:IDF_COMPONENT_REGISTRY_URL = 'https://components.espressif.cn'
 $env:IDF_COMPONENT_STORAGE_URL = 'https://components-file.espressif.cn'
-# 中文 Windows 默认 gbk 会让 kconfgen 读 config.env 崩，强制 UTF-8
-$env:PYTHONUTF8 = '1'
-$env:PYTHONIOENCODING = 'utf-8'
-# ccache 在非 ASCII 路径下会崩，先关掉（详见常见坑 1）
-$env:IDF_CCACHE_ENABLE = '0'
+# 首选方案：把工程放纯英文路径（如 D:\eb-build\my-device），ccache 崩溃 / gbk 解码 / ldgen 乱码这类中文路径错误大多能直接避免。
+# 下面三行是"兜底开关"——仅当工程路径已确认纯英文、仍出现 ccache 崩溃或 gbk 解码错误时，才取消注释启用：
+#   - IDF_CCACHE_ENABLE=0 会关闭 ccache、牺牲增量编译加速（每次接近全量重编），非首选；
+#   - PYTHONUTF8=1 / PYTHONIOENCODING=utf-8 强制 Python 用 UTF-8，可解决中文 Windows 控制台默认 gbk 读 config.env 报错。
+# $env:PYTHONUTF8 = '1'
+# $env:PYTHONIOENCODING = 'utf-8'
+# $env:IDF_CCACHE_ENABLE = '0'
 . $env:IDF_PATH\export.ps1
 ```
 
@@ -63,24 +65,25 @@ macOS/Linux 等价（激活脚本换成 export.sh，环境变量写法相同）�
 ```bash
 export IDF_PATH=~/esp/v5.4.1
 export IDF_TOOLS_PATH=~/esp/tools
-export PYTHONUTF8=1
-export IDF_CCACHE_ENABLE=0
+# 首选：工程放纯英文路径。以下为兜底开关，仅在纯英文路径下仍报 ccache 崩溃 / gbk 解码错误时取消注释启用：
+# export PYTHONUTF8=1
+# export IDF_CCACHE_ENABLE=0
 . $IDF_PATH/export.sh
 ```
 
-**多版本切换**：本机同时装了 v5.4.1 与 v5.5.5。切版本只需换 `IDF_PATH` 再重新 source（tools 共用 `D:\esp\tools` 也可，互不覆盖）：
+**多版本切换**：本机同时装了 v5.4.1 与 v5.5.5。切版本只需换 `IDF_PATH` 再重新 source（tools 共用同一目录也可，互不覆盖）：
 
 ```powershell
 # 从 v5.4.1 切到 v5.5.5：
-$env:IDF_PATH = 'D:\esp\v5.5.5'
-. D:\esp\v5.5.5\export.ps1
+$env:IDF_PATH = '<你的 IDF 安装路径>\v5.5.5'
+. '<你的 IDF 安装路径>\v5.5.5\export.ps1'
 ```
 
 **验证激活成功**：
 
 ```powershell
 idf.py --version                       # 应输出 ESP-IDF v5.4.1 或 v5.5.5
-(Get-Command xtensa-esp32s3-elf-gcc).Source   # 应指向 D:\esp\tools\...下的 gcc
+(Get-Command xtensa-esp32s3-elf-gcc).Source   # 应指向 <你的工具目录>\...下的 gcc
 ```
 
 **建工程与编译（务必在纯英文路径）**：
@@ -93,7 +96,7 @@ idf.py -p COM4 flash        # 把 COM4 换成你自己的口
 idf.py -p COM4 monitor      # 看串口日志，Ctrl+] 退出
 ```
 
-> EasyInput V2.0 板提示：开机状态下**短按一次 BOOT** 进入下载模式，退出需关机重开；它没有独立 RESET 键，不要按"按住 BOOT 再上电"那套老板子流程。
+> EasyInput V2.0 板提示：开机状态下**短按一次 BOOT** 进入下载模式，退出需关机重开；它没有独立 RESET 键，不要按"按住 BOOT 再上电"那套老板子流程。（仅参考案例板提示；你自己的板以 `docs/board-contract.json` 的 `boot.enter`/`boot.exit` 为准。）
 
 ### 3. Arduino IDE（esp32 开发板包 + 国内加速）
 
@@ -112,7 +115,7 @@ https://jihulab.com/esp-mirror/espressif/arduino-esp32/-/raw/gh-pages/package_es
 ```powershell
 # 用系统 Python（已勾"Add to PATH"）装工具
 pip install esptool mpremote
-# 1) 擦除整片 Flash
+# 1) 擦除整片 Flash（MicroPython 首次烧录前通常需要；日常重烧用下面 write_flash 覆盖即可，不必反复擦）
 esptool --port COM4 erase_flash
 # 2) 烧录固件（.bin 从 micropython.org 下载页选 ESP32-S3 对应型号）
 esptool --port COM4 --baud 460800 write_flash 0x1000 ESP32_GENERIC_S3-xxxx.bin
@@ -165,15 +168,15 @@ macOS/Linux：Node 用 `nvm install 24` 或官网 pkg；pnpm 用 `curl -fsSL htt
 模板 A：环境体检（装完照着跑）
 
 ```text
-我在 Windows 11 上按下面这份清单装 ESP32-S3 开发环境，请帮我写一份"环境体检"PowerShell 脚本（.ps1），逐项检查并打印 PASS/FAIL：① node -v 是否 v24、pnpm -v 是否存在；② 在我指定的 IDF_PATH（D:\esp\v5.4.1）下 export.ps1 后 idf.py --version 能否输出；③ xtensa-esp32s3-elf-gcc 是否在 PATH；④ 列出当前所有 COM 口；⑤ 检查是否误把工程放在含中文/空格的路径。脚本要求：纯英文输出、出错不中断、最后汇总未通过项和修复命令。
+我在 Windows 11 上按下面这份清单装 ESP32-S3 开发环境，请帮我写一份"环境体检"PowerShell 脚本（.ps1），逐项检查并打印 PASS/FAIL：① node -v 是否 v24、pnpm -v 是否存在；② 在我指定的 IDF_PATH（<你的 IDF 安装路径>）下 export.ps1 后 idf.py --version 能否输出；③ xtensa-esp32s3-elf-gcc 是否在 PATH；④ 列出当前所有 COM 口；⑤ 检查是否误把工程放在含中文/空格的路径。脚本要求：纯英文输出、出错不中断、最后汇总未通过项和修复命令。
 ```
 
 模板 B：编译报错回贴排查（最常用）
 
 ```text
-我在用 ESP-IDF 5.4.1 编译一个 ESP32-S3 工程，工程路径是 D:\eb-build\my-device（纯英文）。我已经做了这些环境设置：PYTHONUTF8=1、IDF_CCACHE_ENABLE=0、组件镜像走 components.espressif.cn。下面是 idf.py build 的完整报错日志（含最后 80 行）：
+我在用 ESP-IDF 5.4.1 编译一个 ESP32-S3 工程，工程路径是 <你的项目目录（纯英文路径、无空格无中文）>。我已经做了这些环境设置：PYTHONUTF8=1、IDF_CCACHE_ENABLE=0、组件镜像走 components.espressif.cn。下面是 idf.py build 的完整报错日志（含最后 80 行）：
 <粘贴报错>
-我的板级合同（引脚/PSRAM/Flash/外设）见 docs/board-reference.md：
+我的板级合同（引脚/PSRAM/Flash/外设）见 docs/board-contract.json：
 <粘贴板级合同要点>
 请按"错误根因 → 证据 → 最小修复命令"三步回答；不要一次改五个地方，先给最可能的那一条。
 ```
@@ -181,19 +184,19 @@ macOS/Linux：Node 用 `nvm install 24` 或官网 pkg；pnpm 用 `curl -fsSL htt
 模板 C：多版本切换脚本
 
 ```text
-我电脑上同时装了 ESP-IDF v5.4.1（D:\esp\v5.4.1）和 v5.5.5（D:\esp\v5.5.5），工具目录都是 D:\esp\tools。请帮我写两个 PowerShell 脚本：activate-idf541.ps1 和 activate-idf555.ps1，各自设置好 IDF_PATH/IDF_TOOLS_PATH/组件镜像环境变量/PYTHONUTF8=1/关闭 ccache，然后 source 对应 export.ps1，最后打印当前版本与 gcc 路径。脚本要能在新开窗口里直接 `. .\activate-idf541.ps1` 使用，并提醒我两个脚本不要在同一窗口里连着 source。
+我电脑上同时装了 ESP-IDF v5.4.1（<你的 IDF 安装路径>\v5.4.1）和 v5.5.5（<你的 IDF 安装路径>\v5.5.5），工具目录都是 <你的工具目录>。请帮我写两个 PowerShell 脚本：activate-idf541.ps1 和 activate-idf555.ps1，各自设置好 IDF_PATH/IDF_TOOLS_PATH/组件镜像环境变量；PYTHONUTF8=1 与关闭 ccache 作为可选兜底（默认注释掉，并在注释里说明"仅在纯英文路径下仍报 gbk/ccache 错误时才打开，关 ccache 会牺牲增量编译加速"），然后 source 对应 export.ps1，最后打印当前版本与 gcc 路径。脚本要能在新开窗口里直接 `. .\activate-idf541.ps1` 使用，并提醒我两个脚本不要在同一窗口里连着 source。
 ```
 
 模板 D：让 AI 熟悉你的板子再写代码
 
 ```text
-接下来我们要在这块板上写固件，请先阅读我的板级合同文件 docs/board-reference.md（里面写了 SoC、模组 N16R8、PSRAM、引出脚分配、按键/LED/音频引脚、串口下载方式）。在写任何代码之前，先复述你对"哪些脚已被占用、哪些脚空闲、下载模式怎么进"的理解，跟我确认无误后再开始。
+接下来我们要在这块板上写固件，请先阅读我的板级合同文件 docs/board-contract.json（里面写了 SoC、模组 N16R8、PSRAM、引出脚分配、按键/LED/音频引脚、串口下载方式）。在写任何代码之前，先复述你对"哪些脚已被占用、哪些脚空闲、下载模式怎么进"的理解，跟我确认无误后再开始。
 ```
 
 ## 常见坑
 
-1. **现象**：`idf.py build` 中途 ccache 进程崩溃/闪退，或报 `ccache.exe has stopped working`。**原因**：ccache 4.x 在含中文/空格路径下 `std::filesystem` 处理非 ASCII 路径有 bug。**解决**：二选一——① 关闭 ccache：`$env:IDF_CCACHE_ENABLE='0'`；② 把整个工程移到纯英文路径（如 `D:\eb-build`）再编译。
-2. **现象**：CMake/kconfgen 阶段报 `UnicodeDecodeError: 'gbk' codec can't decode byte ...`。**原因**：中文 Windows 控制台默认 gbk，而 IDF 的 config.env 是 UTF-8。**解决**：激活时先 `$env:PYTHONUTF8='1'; $env:PYTHONIOENCODING='utf-8'`，再 source export.ps1。
+1. **现象**：`idf.py build` 中途 ccache 进程崩溃/闪退，或报 `ccache.exe has stopped working`。**原因**：ccache 4.x 在含中文/空格路径下 `std::filesystem` 处理非 ASCII 路径有 bug——**中文路径是根因**。**解决**：首选——把整个工程（连同 IDF 本体与 tools）移到纯英文路径（如 `D:\eb-build\my-device`）再编译，这是正解。若路径已确认纯英文仍偶发 ccache 崩溃，再兜底关闭 ccache：`$env:IDF_CCACHE_ENABLE='0'`；注意这会牺牲 ccache 增量编译加速，非首选。
+2. **现象**：CMake/kconfgen 阶段报 `UnicodeDecodeError: 'gbk' codec can't decode byte ...`。**原因**：中文 Windows 控制台默认 gbk，而 IDF 的 config.env 是 UTF-8；若工程/IDF 路径含中文会放大此问题。**解决**：首选仍是保证工程与 IDF/tools 路径纯英文；若路径已纯英文仍报 gbk 解码错误，再兜底强制 UTF-8——`$env:PYTHONUTF8='1'; $env:PYTHONIOENCODING='utf-8'` 后再 source export.ps1。
 3. **现象**：链接器/ldgen 阶段报奇怪的中文路径乱码、找不到组件，或明明文件存在却说 not found。**原因**：ldgen 等 Python 脚本在含中文路径下读写文件路径乱码。**解决**：工程目录一律纯英文（`D:\eb-build`），不要放在桌面/中文用户目录下；IDF 本体与 tools 也保持纯英文（如 `D:\esp`）。
 4. **现象**：`idf.py build` 卡在下载组件、`git clone` GitHub 超时、或组件注册表连不上。**原因**：GitHub 直连不稳。**解决**：激活时设置 `$env:IDF_COMPONENT_REGISTRY_URL='https://components.espressif.cn'` 与 `$env:IDF_COMPONENT_STORAGE_URL='https://components-file.espressif.cn'`；IDF/工具链安装包从 `dl.espressif.cn` 下，不要从 GitHub Releases 硬下。
 5. **现象**：插上板子，设备管理器里没有 COM 口，或 COM 口带黄色感叹号。**原因**：串口芯片驱动没装（CP210x / CH340），或用了只能充电的 USB 线。**解决**：装对应驱动（见"资源与延伸"），换一根确认能传数据的 USB 线，拔插一次再看设备管理器。
@@ -204,15 +207,15 @@ macOS/Linux：Node 用 `nvm install 24` 或官网 pkg；pnpm 用 `curl -fsSL htt
 ## 验收清单
 
 - [ ] 串口驱动已装，设备管理器能看到板子的 COM 口并记下编号
-- [ ] ESP-IDF v5.4.1（及 v5.5.5）已解压到纯英文路径 `D:\esp\` 下，tools 在 `D:\esp\tools`
+- [ ] ESP-IDF v5.4.1（及 v5.5.5）已解压到纯英文路径（如 `D:\esp\`），tools 在独立纯英文目录
 - [ ] 新窗口跑激活脚本后，`idf.py --version` 正常输出版本号
 - [ ] `xtensa-esp32s3-elf-gcc` 在 PATH 中能找到
-- [ ] 已设置 `PYTHONUTF8=1`、组件国内镜像、`IDF_CCACHE_ENABLE=0`
+- [ ] 组件国内镜像已设置；工程与 IDF/tools 均在纯英文路径下；`PYTHONUTF8=1` / `IDF_CCACHE_ENABLE=0` 仅在纯英文路径下仍报 gbk/ccache 错误时作为兜底启用（非默认开启）
 - [ ] 在纯英文路径（如 `D:\eb-build`）下完成过一次 `idf.py set-target esp32s3 && idf.py build` 成功
 - [ ] Arduino IDE 已通过 jihulab 镜像装好 esp32 板包（-cn 版本），能选到 ESP32S3 Dev Module
 - [ ] MicroPython 已能 `mpremote` 进 REPL（或至少 esptool 能识别芯片）
 - [ ] VSCode 已装 PlatformIO 插件，能创建 esp32-s3 工程
-- [ ] `node -v` 为 v24.x、`pnpm -v` 正常，且已建立 `docs/board-reference.md`（板级合同）供后续 AI 辅助开发阅读
+- [ ] `node -v` 为 v24.x、`pnpm -v` 正常，且已建立 `docs/board-contract.json`（板级合同）供后续 AI 辅助开发阅读
 
 ## 资源与延伸
 
