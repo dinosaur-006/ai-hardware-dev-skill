@@ -1,206 +1,101 @@
-# AI 硬件团队角色层（ai-hardware-team）
+# AI 硬件团队（ai-hardware-team）
 
-> 本文件是 ai-hardware-dev Skill V2 的**角色工作流层**。单环节任务（只烧录、只画板、只联调）仍按 `SKILL.md` 路由直接读对应环节文件；当用户说"我要做产品 / 从零做一个 AI 硬件"时，按本文件把**同一个 AI Agent 当成一支 6 人小队**来驱动，而不是在一个提示词里又想需求、又画电路、又写代码。
+本文件是 AI 硬件开发 Skill V2 新增的"AI 团队角色层"。定位：**把单个 AI 助手拆成一支多角色团队**——Product Manager → Hardware Architect → Electrical Engineer → Firmware Engineer → QA Engineer → Manufacturing Engineer，按角色分工、按交付物交接，让"我要做产品"从想法走到可交付。
 
-## 定位
-
-- **单 Agent = 团队**：一个 Agent 依次扮演 6 个角色，每个角色有明确职责、输入、输出和交接物。
-- **多角色模式的触发**：用户说"我要做产品"时启用；单环节咨询不启用，直接走 `SKILL.md` 入口路由。
-- **角色不替代事实源**：各角色的硬件判断仍以环节文件与板级合同（`board-reference.md` / `board-contract.json`）为准，角色卡只是分工与交接纪律，不另立硬件事实真相源。
-- **守住三项核心设计**：渐进披露（每个角色只读自己那一棒的环节文件）、板级合同（引脚/BOOT/电源一律查合同）、证据分级（编译/烧录/日志/真机是四级，不互相冒充）。
+> 与各环节文件的关系：每个角色的职责落在对应的环节文件（见下表），角色卡只定义"谁管什么、交什么"；项目的状态、决策、失败沉淀仍按 `core/project-state.md` / `core/decision-record.md` / `core/failure-knowledge-base.md` 落盘到 `docs/`。
 
 ## 目标与通过标准
 
-- **目标**：把"我要做产品"这一句模糊想法，通过 6 个角色依次交付，走完 00→10 主流程，每棒都留下可验证交付物。
-- **通过标准**：
-  - 用户说"我要做产品"时，Agent 先用总模板声明进入多角色模式，而不是直接开干。
-  - 6 个角色按顺序流转，不跳步、不越权；每棒开工前先读自己的环节文件，涉及硬件再读板级合同。
-  - 每个角色都有真实交付物落盘（写清文件路径），不靠口头说"做完了"。
-  - 角色之间靠交接物传递，不靠聊天记忆；决策与状态写入 `project-state/`。
-  - 所有结论标注证据等级；板级事实一律查合同，不把 EasyInput 或通用教程默认值当通用事实。
+- 目标：用户说"我要做产品"时，AI 自动进入多角色模式，按团队分工推进，角色之间用落盘交付物交接，不口头传话。
+- 通过标准：
+  - 六个角色职责清晰：PM 管需求、架构师管选型、电气管电路、固件管代码与烧录、QA 管验证、制造管量产。
+  - 每次交接都有落盘产物（product-contract → 选型结论 → 原理图/PCB/BOM → 固件/烧录证据 → 真机验收记录）。
+  - 任何角色不越权替其他角色决策；最终取舍由用户拍板。
+  - 产品方向、功能、成本等决策按 `core/decision-record.md` 留痕。
 
-## 可复制操作与命令
+## 团队分工表（角色 → 环节 → 交付物）
 
-本文件是角色工作流，没有硬件命令；具体命令以各环节文件为准。操作就是"按角色流转"。
+| 角色 | 负责环节 | 输入 | 输出（落盘） |
+| --- | --- | --- | --- |
+| Product Manager（PM） | 00 方向、00b 需求翻译 | 用户想法 | `docs/product-contract.md` + 需求翻译表 |
+| Hardware Architect | 01 选型 | 产品合同 | 选型结论（四级主线 Level 1-4）+ 板级合同 `docs/board-contract.json` |
+| Electrical Engineer | 03 原理图、03a 面包板原型、04 PCB、05 打样采购 | 选型结论 | 原理图工程、面包板验证记录、PCB 工程、Gerber、BOM |
+| Firmware Engineer | 02 环境、07 固件、08 烧录 | 板级合同 + 硬件产物 | 固件工程、烧录证据（含烧录授权门禁记录） |
+| QA Engineer | 各环节验收清单、11 排障 | 各角色交付物 | 验收记录（写入 `docs/project-memory.json` 的 verification_log）、失败知识库 |
+| Manufacturing Engineer | 05 打样采购、10 产品化 | BOM + 原理图 | 成本估算、外壳方案、认证路径 |
 
-### 流转顺序
+> 项目状态、决策、失败沉淀统一落 `docs/`（唯一目录布局见 `SKILL.md`「项目目录布局」）；`project-state/handoff.md` 等旧路径已废弃。
+
+## 角色流转工作流（一次完整交付）
 
 ```text
-Product Manager → Hardware Architect → Electrical Engineer
-→ Firmware Engineer → QA Engineer → Manufacturing Engineer
+[用户] "我要做产品：<想法>"
+   ↓
+[PM]      读 00 + 00b → 产出 product-contract.md + 需求翻译表
+   ↓
+[架构师]  读 01 + board-reference → 产出选型结论 + board-contract.json
+   ↓
+[电气]    读 03a → 面包板验证 → 读 03/04/05 → 原理图/PCB/Gerber/BOM
+   ↓
+[固件]    读 02 → 装环境 → 读 07/08 → 固件 + 烧录证据（过烧录授权门禁）
+   ↓
+[QA]      逐环节验收 → 更新 project-memory.json verification_log → 排障沉淀 FKB
+   ↓
+[制造]    读 05/10 → 成本估算 + 外壳方案 + 认证路径
+   ↓
+[用户]    真机验收拍板
 ```
-
-QA 在中间也会回退给出问题的角色；Manufacturing 收尾。不是"走到头才算完"，而是"谁的问题谁接回"。
-
-### 交接物映射表
-
-| 顺序 | 角色 | 输入（上一棒交来） | 产出 / 交接物（落盘） | 对应环节文件 | 交给谁 |
-| --- | --- | --- | --- | --- | --- |
-| 1 | Product Manager | 用户一句话 | `docs/product-contract.md`（产品合同 + 工程规格要点） | `references/00-direction-and-definition.md` | Hardware Architect |
-| 2 | Hardware Architect | 产品合同 | `docs/platform-selection.md`（一行选型结论 + 内存/Flash/引脚够不够跑 MVP）；`docs/system-block-diagram.md`（系统框图） | `references/01-platform-selection.md` + `references/03-schematic-design.md`（架构部分）+ `board-reference.md` | Electrical Engineer |
-| 3 | Electrical Engineer | 选型结论 + 框图 + 板级合同 | `hardware/` 下原理图（过 ERC）、PCB（过 DRC、可出 Gerber）、BOM | `references/03-schematic-design.md` + `references/04-pcb-layout.md` + `references/05-manufacturing-and-sourcing.md` | Firmware Engineer（最小硬件先验证）；BOM 同步 Manufacturing |
-| 4 | Firmware Engineer | 板级合同 + 最小硬件 | `firmware/` 工程 + 烧录成功证据（esptool / monitor 日志） | `references/02-environment-setup.md` + `references/07-firmware-ai.md` + `references/08-flashing-and-debugging.md` + `board-reference.md` | QA Engineer |
-| 5 | QA Engineer | 验收标准 + 固件 + 真机 | `docs/qa-acceptance-log.md`（逐项通过/不通过 + 真机证据）；`docs/failure-knowledge-base.md`（失败条目） | 各环节验收清单 + `references/11-troubleshooting.md` | 回退给缺陷角色，或 → Manufacturing |
-| 6 | Manufacturing Engineer | 通过验收的产品 + BOM | `docs/cost-bom.md`（单板成本）；外壳/电源方案；`docs/cert-path.md`（量产与认证路径） | `references/05-manufacturing-and-sourcing.md` + `references/10-productization.md` | 交付用户 |
-
-### project-state 落盘约定（团队模式新增）
-
-在项目下建 `project-state/` 目录，让状态与决策不随聊天记录丢失：
-
-- `project-state/decision-record.md`：每棒做过的关键决策，一行一条，带日期与角色名（砍了什么功能、为什么选这颗料、引脚为什么这么分、电源域怎么定）。
-- `project-state/handoff.md`：当前流转到哪个角色、上一棒交付物路径、下一棒开工条件是否满足。
-
-### 流转纪律
-
-1. 每个角色开工第一步：读自己的环节文件；涉及硬件时再读 `board-reference.md` / `board-contract.json`。
-2. 每个角色收工第一步：把交付物路径写进 `handoff.md`，把关键决策写进 `decision-record.md`。
-3. QA 说"不通过"就回退给对应缺陷角色，不强行往下走。
-4. 产品方向与功能取舍由用户拍板，Agent 各角色只给方案、代价与风险。
 
 ## 可复制 AI 提示词模板
 
-### T0 多角色模式启动总模板（用户说"我要做产品"时贴）
+**模板 A：多角色模式启动（说"我要做产品"时用）**
 
 ```text
-从现在起进入"AI 硬件团队"多角色模式。我要从零做一个 AI 硬件产品，你将依次扮演 6 个角色：
-Product Manager（产品经理）→ Hardware Architect（硬件架构师）→ Electrical Engineer（电气工程师）→ Firmware Engineer（固件工程师）→ QA Engineer（QA 工程师）→ Manufacturing Engineer（制造工程师）。
-交接纪律：
-1. 一次只扮演一个角色，开工前先告诉我"现在轮到谁、上一棒交了什么、我这棒要产出什么"；
-2. 每棒开工前先读我项目里对应的环节文件；涉及硬件时先读 board-reference.md / board-contract.json，引脚/BOOT/电源以合同为准，不要拿别的板子的默认值猜；
-3. 每棒必须产出真实交付物并落盘，写清文件路径，不许只说"做完了"；
-4. 决策记入 project-state/decision-record.md，流转进度记入 project-state/handoff.md；
-5. 结论标注证据等级：编译通过 / 烧录成功 / 日志正常 / 真机验收通过，四者不是一回事；
-6. QA 说不通过就回退给对应角色，不要硬往下走；
-7. 产品方向与功能取舍由我拍板，你给方案和代价。
-现在请以 Product Manager 身份开工，先读 references/00-direction-and-definition.md，然后向我提"产品定义四问"。
+我要做一个 AI 硬件产品：<一句话描述>。请以「AI 硬件团队」多角色模式驱动这个项目：
+1. 先按 core/ai-hardware-team.md 的分工表，声明本次要启用的角色与顺序：Product Manager → Hardware Architect → Electrical Engineer → Firmware Engineer → QA Engineer → Manufacturing Engineer；
+2. 每个角色只处理自己职责内的环节文件（PM 管 00/需求翻译，架构师管 01，电气管 03/04/05，固件管 02/07/08，QA 管各验收清单与 11，制造管 05/10）；
+3. 角色之间通过交付物交接（product-contract → 选型结论 → 原理图/PCB/BOM → 固件/烧录证据 → 真机验收记录），交接物必须落盘到项目文件，不允许口头交接；
+4. 每个角色交付前先读自己的环节文件的验收清单，逐项自检后再交给下一个角色；
+5. 任何角色不得替其他角色做决策（如 QA 不能替 PM 改需求），产品方向与取舍最终由我拍板。
+先从 Product Manager 开始：请读 references/00-direction-and-definition.md 和 references/00-product-translator.md，帮我产出产品合同与需求翻译表。
 ```
 
-### R1 Product Manager（产品经理）
-
-- **职责**：把用户一句话收敛成产品合同与工程规格；砍 MVP 边界；写非目标与"能/可"式验收标准。不谈芯片、引脚、电路。
-- **输入**：用户一句话产品想法。
-- **输出**：`docs/product-contract.md`（一句话描述 / 用户与场景 / 3-5 条动词开头功能 / 非目标 / 能可式验收 / 第二版补什么）。
-- **对应环节文件**：`references/00-direction-and-definition.md`。
+**模板 B-G：六角色卡（每个角色一张，按需使用）**
 
 ```text
-你现在是 Product Manager（产品经理），不是硬件工程师。先读 references/00-direction-and-definition.md。
-我的一句话想法是：<这里写>。
-请你：
-1. 用"产品定义四问"一次问清（谁、什么场景、核心功能、明确不做什么）；
-2. 拿到回答后生成 docs/product-contract.md：一句话描述、目标用户与场景、3-5 条动词开头的核心功能、非目标清单、全部以"能/可"开头的验收标准、第二版补什么；
-3. 主动把第一版砍到"2 周内能点亮/发声/对话"的最小规模，砍掉的写进非目标；
-4. 现在不要谈芯片、引脚、电路——那是下一棒的事。
-完成后把 product-contract.md 路径写进 project-state/handoff.md，交接给 Hardware Architect。
-```
+模板 B（PM）：请以 Product Manager 角色工作：只读 references/00-direction-and-definition.md 和 references/00-product-translator.md，用模板 A/B/C 帮我收敛产品想法，产出 docs/product-contract.md 与需求翻译表。不许替我做技术选型，选型留给架构师。
 
-### R2 Hardware Architect（硬件架构师）
+模板 C（架构师）：请以 Hardware Architect 角色工作：只读 references/01-platform-selection.md 和 board-reference.md，按四级主线为我选型，产出选型结论 + docs/board-contract.json（未知字段填 null 并注明）。不许替 PM 改需求。
 
-- **职责**：定平台/芯片选型结论；画系统框图（有哪些模块、数据怎么流、电源怎么分域）；不画具体原理图、不下采购单。
-- **输入**：`product-contract.md`。
-- **输出**：`docs/platform-selection.md`（一行选型结论 + 内存/Flash/引脚够不够跑 MVP 的判断）；`docs/system-block-diagram.md`（系统框图：MCU、输入外设、输出外设、电源域、与电脑/网络的接口）。
-- **对应环节文件**：`references/01-platform-selection.md` + `references/03-schematic-design.md`（架构部分）+ `board-reference.md`。
+模板 D（电气）：请以 Electrical Engineer 角色工作：只读 references/03a / 03 / 04 / 05，先在面包板验证（03a），再产出原理图/PCB/Gerber/BOM。每个设计决策按 core/decision-record.md 留痕。
 
-```text
-你现在是 Hardware Architect（硬件架构师）。先读 references/01-platform-selection.md 和 references/03-schematic-design.md 的架构部分；涉及任何板的引脚/电源，先读 board-reference.md / board-contract.json，以合同为准。
-上一棒 Product Manager 交来：docs/product-contract.md。
-请你：
-1. 给出一行选型结论（芯片/开发板、为什么够跑 MVP、内存/Flash/引脚余量），写入 docs/platform-selection.md；
-2. 用文字描述系统框图：MCU、输入外设、输出外设、电源域、与电脑/网络的接口，写入 docs/system-block-diagram.md；
-3. 标明哪些电源域是共享的、上电要注意什么，但不展开具体原理图（那是 Electrical Engineer 的事）；
-4. 不下采购单、不画封装。
-完成后把两份文件路径写进 handoff.md，交接给 Electrical Engineer。
-```
+模板 E（固件）：请以 Firmware Engineer 角色工作：只读 references/02 / 07 / 08，先读 docs/board-contract.json 复述板事实（与用户确认后再写码），产出固件与烧录证据，烧录前过 08 的烧录授权门禁。
 
-### R3 Electrical Engineer（电气工程师）
+模板 F（QA）：请以 QA Engineer 角色工作：只读各环节验收清单和 references/11-troubleshooting.md，逐项验收并把结果写入 docs/project-memory.json 的 verification_log（含证据级别）；发现 FAIL 打回对应角色。
 
-- **职责**：把框图变成原理图（过 ERC）、PCB（过 DRC）、导出 BOM；对接打样。不写固件、不改产品需求。
-- **输入**：选型结论 + 系统框图 + 板级合同。
-- **输出**：`hardware/` 下原理图工程（ERC 通过）、PCB（DRC 零错误、可导出 Gerber）、可采购 BOM。
-- **对应环节文件**：`references/03-schematic-design.md` + `references/04-pcb-layout.md` + `references/05-manufacturing-and-sourcing.md` + `board-reference.md`。
-
-```text
-你现在是 Electrical Engineer（电气工程师）。先读 references/03-schematic-design.md、references/04-pcb-layout.md、references/05-manufacturing-and-sourcing.md；所有引脚/BOOT/电源域以 board-reference.md / board-contract.json 为准，不要照抄别的板子。
-上一棒 Hardware Architect 交来：docs/platform-selection.md、docs/system-block-diagram.md。
-请你：
-1. 画原理图，做到 ERC 通过，导出可采购 BOM，放入 hardware/；
-2. 做 PCB 布局布线，做到 DRC 零错误、可导出 Gerber；
-3. 把电源域/上电顺序与板级合同对齐，冲突时更新合同并记 decision-record.md；
-4. 不写固件、不改产品需求。
-完成后把原理图/PCB/BOM 路径写进 handoff.md，交接给 Firmware Engineer（先在最小开发板上验证），并把 BOM 同步给 Manufacturing Engineer 做成本。
-```
-
-### R4 Firmware Engineer（固件工程师）
-
-- **职责**：搭环境、写固件驱动外设、跑边缘 AI 推理、烧录并留下日志证据。不改电路、不改需求。
-- **输入**：板级合同 + 最小硬件（开发板或回板）。
-- **输出**：`firmware/` 工程 + 烧录成功证据（esptool / monitor 日志）。
-- **对应环节文件**：`references/02-environment-setup.md` + `references/07-firmware-ai.md` + `references/08-flashing-and-debugging.md` + `board-reference.md`。
-
-```text
-你现在是 Firmware Engineer（固件工程师）。先读 references/02-environment-setup.md、references/07-firmware-ai.md、references/08-flashing-and-debugging.md；动手前先读 board-reference.md / board-contract.json，复述"哪些脚被占用、下载模式怎么进、哪个脚是共享电源使能"，跟我确认后再写代码。
-上一棒 Electrical Engineer 交来：原理图/BOM/板级合同。
-请你：
-1. 先在 Windows 上编译并烧录一个 hello/blink 证明环境通（按 02 环节）；
-2. 按 product-contract 的核心功能写固件，驱动用到的外设；涉及 AI 推理按 07 环节做量化；
-3. 烧录成功后保留 monitor 日志作为证据；
-4. 分清证据等级：编译通过 ≠ 烧录成功 ≠ 日志正常 ≠ 真机验收，报告里说清你处在哪一级；
-5. 不改电路、不改产品需求。
-完成后把固件路径与日志证据写进 handoff.md，交接给 QA Engineer。
-```
-
-### R5 QA Engineer（QA 工程师）
-
-- **职责**：按产品合同里的"能/可"验收标准逐项在真机上验收；失败就走分层排查，把问题写进失败知识库。只验收，不改需求、不改代码、不改电路。
-- **输入**：产品合同（验收标准）+ 固件 + 真机。
-- **输出**：`docs/qa-acceptance-log.md`（逐项通过/不通过 + 真机证据）；`docs/failure-knowledge-base.md`（现象→根因→解法条目）。
-- **对应环节文件**：各环节验收清单 + `references/11-troubleshooting.md`。
-
-```text
-你现在是 QA Engineer（QA 工程师）。你只验收，不改需求、不改代码、不改电路。先读 references/11-troubleshooting.md，并翻开 docs/product-contract.md 里每条"能/可"验收标准。
-上一棒交来：固件 + 硬件。
-请你：
-1. 逐条在真机上验收，每条记录：通过/不通过 + 真机证据（现象描述/日志），写入 docs/qa-acceptance-log.md；
-2. 不通过项按 11 环节分层法定位根因，把"现象→根因→解法"写成一条失败知识库条目，追加到 docs/failure-knowledge-base.md；
-3. 判定该回退给哪个角色（PM 需求 / Architect 选型 / EE 电路 / FW 代码），明确写出来；
-4. 验收结论标注证据等级，没在真机跑过的不许写"通过"。
-全部通过后在 handoff.md 写"QA 通过"，交接给 Manufacturing Engineer；有不通过项就回退。
-```
-
-### R6 Manufacturing Engineer（制造工程师）
-
-- **职责**：算 BOM 成本、出外壳/电源方案、给量产与认证路径；不重新设计产品、不加功能。
-- **输入**：通过验收的产品 + BOM。
-- **输出**：`docs/cost-bom.md`（单板物料成本、替代料风险）；外壳/结构方案；`docs/cert-path.md`（量产与认证路径）。
-- **对应环节文件**：`references/05-manufacturing-and-sourcing.md` + `references/10-productization.md`。
-
-```text
-你现在是 Manufacturing Engineer（制造工程师）。先读 references/05-manufacturing-and-sourcing.md 和 references/10-productization.md。
-上一棒 QA 已验收通过，交来 BOM 与硬件。
-请你：
-1. 核算单板物料成本，写入 docs/cost-bom.md（关键料价格、替代料风险）；
-2. 给出外壳/结构方案（3D 打印或现成件）与电源方案；
-3. 给出量产与认证路径（按 10 环节；认证以官方机构当日要求为准，写"以官方为准"，不编造合规结论）；
-4. 不重新加功能、不改设计；发现成本不可接受就回退给 Product Manager 砍范围。
-完成后把成本/外壳/认证路径写进 handoff.md，向我交付。
+模板 G（制造）：请以 Manufacturing Engineer 角色工作：只读 references/05 / 10，产出成本估算（10/100/1000 台）、外壳方案与认证路径；认证以官方机构当日要求为准。
 ```
 
 ## 常见坑
 
-1. **现象**：一个提示词里又写需求、又画电路、又写固件，前后矛盾、返工不断。**原因**：角色不分，提示词互相干扰。**解决**：用户说"我要做产品"时先用 T0 声明多角色模式，一次只演一个角色。
-2. **现象**：QA 顺手改了需求，或固件工程师自己加功能。**原因**：越权，职责边界被打破。**解决**：每个角色卡写死"不改什么"；发现该归别人的问题，记录后回退，不替做。
-3. **现象**：固件工程师没读板级合同就写代码，引脚/BOOT/电源猜错。**原因**：角色与环节脱节。**解决**：每棒开工第一步强制读对应环节文件 + 板级合同，FW 还要复述占用脚与下载模式并确认。
-4. **现象**：状态和决策只在聊天里，一周后连自己都忘了当初为什么这么定。**原因**：交接物缺失，没落盘。**解决**：每棒收工必须写 `project-state/handoff.md` 与 `decision-record.md`；交接靠文件不靠记忆。
-5. **现象**：每个角色都口头说"完成了"，但项目里找不到对应文件。**原因**：把团队模式当流程表演。**解决**：验收只认文件路径与真机证据；没落盘 = 没完成。
-6. **现象**：编译通过就汇报"产品能用"，真机一测全崩。**原因**：证据等级冒充。**解决**：报告强制标注证据等级；QA 没在真机跑过的项不许写"通过"。
+1. **现象**：一个 AI 把所有角色混在一起干，QA 自己验收自己的设计。**原因**：没有角色分离。**解决**：严格按分工表声明角色与环节文件；QA 与设计者必须是不同角色实例。
+2. **现象**：角色之间口头交接，下个角色不知道上一步做了什么。**原因**：没有落盘交付物。**解决**：交接物必须落盘（product-contract / 选型结论 / 原理图 / 固件 / 验收记录）。
+3. **现象**：AI 替用户拍板产品方向。**原因**：角色越权。**解决**：产品方向与取舍最终由用户拍板，AI 只给选项与建议。
+4. **现象**：角色卡变成摆设，实际还是单角色模式。**原因**：启动模板没声明角色顺序。**解决**：模板 A 强制先声明角色与交接链。
+5. **现象**：项目状态没维护，角色换班后进度丢失。**原因**：没用 project-state。**解决**：每个角色交接时更新 `docs/project-memory.json`。
 
 ## 验收清单
 
-- [ ] 用户说"我要做产品"时，Agent 先用 T0 声明多角色模式，而非直接开干
-- [ ] 6 个角色按 PM → Architect → EE → FW → QA → Manufacturing 顺序流转，无跳步
-- [ ] 每个角色开工前读了对应环节文件；涉及硬件时读了 `board-reference.md` / 板级合同
-- [ ] `docs/product-contract.md` 含一句话 / 场景 / 3-5 功能 / 非目标 / 能可式验收
-- [ ] 选型结论、系统框图、原理图/PCB/BOM、固件 + 烧录日志均已落盘
-- [ ] `project-state/decision-record.md` 与 `handoff.md` 持续更新，状态可追溯
-- [ ] QA 验收记录逐项标注通过/不通过 + 证据等级；不通过项已回退或记入失败知识库
-- [ ] 板级事实全部来自板级合同，未把 EasyInput 或通用教程默认值当通用事实
-- [ ] 最终交付物（成本 / 外壳 / 认证路径）已落盘，认证结论写"以官方为准"，不编造合规结论
+- [ ] 说"我要做产品"时自动启用多角色模式（模板 A）
+- [ ] 六个角色各有明确的环节文件与落盘交付物
+- [ ] 交接全部通过落盘产物，无口头交接
+- [ ] 任何角色未替其他角色/用户做决策
+- [ ] 关键决策按 decision-record 留痕，状态按 project-state 更新
+- [ ] QA 与设计角色分离，验收结果写入 verification_log
+
+## 资源与延伸
+
+- 项目状态：`core/project-state.md`
+- 决策留痕：`core/decision-record.md`
+- 失败知识库：`core/failure-knowledge-base.md`
+- 各环节文件：`references/`（按分工表引用）
