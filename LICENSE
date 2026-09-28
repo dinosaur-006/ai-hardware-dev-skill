@@ -1,21 +1,36 @@
 # LICENSE
 
-## 本 Skill 包（ai-hardware-dev）
+## 本 Skill 包（ai-hardware-dev）双授权声明
 
-本包内容（SKILL.md、board-reference.md、prompt-templates.md、resources.md、references/ 下全部文件、README.md、NOTICE）以 **知识共享 署名-非商业性使用 4.0 国际（CC BY-NC 4.0）** 授权：
+本包内容（SKILL.md、board-reference.md、prompt-templates.md、resources.md、references/ 与 core/ 下全部文件、scripts/ 下脚本、README.md、CHANGELOG.md、NOTICE）采用**双授权（Dual-License）**方式发布，使用者按用途选择适用授权：
 
-- 您可以在注明出处的前提下，**自由使用、复制、修改、分发**本包内容；
-- **不得用于商业目的**（包括但不限于：售卖本包、用本包内容支撑商业产品/服务、商业培训收费）。
+### 1. 默认授权：PolyForm Noncommercial License 1.0.0（非商业）
 
-完整法律文本：https://creativecommons.org/licenses/by-nc/4.0/legalcode.zh-hans
+- 适用场景：**非商业目的**——个人学习、研究、实验、兴趣爱好、教学、公益与开源社区使用等（详见许可文本对「Noncommercial Purposes」的定义）。
+- 该授权包含版权、分发与**专利授权**条款，但不允许商业使用。
+- 完整法律文本见 `LICENSE-PolyForm-Noncommercial-1.0.0.txt`，官方地址：https://polyformproject.org/licenses/noncommercial/1.0.0
 
-## 训练营资料专项约定
+### 2. 商业/专利授权：Apache License 2.0
+
+- 适用场景：需要**商业使用**（如用本包内容支撑商业产品/服务、商业培训收费）或需要更宽松专利授权条款的场景。
+- 商业使用需**另行取得权利人授权**，并遵循 Apache-2.0 的条款（署名、保留声明、专利授权与终止条款等）。
+- 完整法律文本见 `LICENSE-Apache-2.0.txt`，官方地址：https://www.apache.org/licenses/LICENSE-2.0.txt
+
+### 选择规则
+
+- **非商业使用**：默认以 PolyForm Noncommercial 1.0.0 授权，无需另行申请。
+- **商业使用**：必须先取得权利人书面/明确授权后，方可按 Apache-2.0 条款使用；未经授权的商业使用不被允许。
+- 两项授权互相独立，按用途选择其一适用，不叠加授予超出各自条款的权利。
+
+## 训练营资料专项约定（对所有授权均有效）
 
 本包引用了 WaytoAGI 第七期「AI 硬件基础训练营」的公开课程资料（见 NOTICE 与 references/camp-notes.md）。训练营资料的授权约定为：**默认可公开、仅限非商业使用**。据此：
 
 - 引用训练营资料时保留来源链接与课程名；
 - 任何商业用途需另行获得 WaytoAGI 训练营授权；
 - 本包从训练营文档提取的提示词模板/操作步骤，仅保留"方法性"内容并标注出处，不复制其全部原文。
+
+> 该专项约定是独立的来源许可约束，不因本包的 Apache-2.0 商业路径而自动放宽；即使本包按 Apache-2.0 授权，引用训练营资料的商业使用仍需另行获得训练营授权。
 
 ## 其他第三方内容
 
