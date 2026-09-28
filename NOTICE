@@ -1,0 +1,30 @@
+# NOTICE（来源与归属声明）
+
+本 Skill 包（ai-hardware-dev）由个人为 AI 硬件学习与 AI 辅助开发整理，内容来源与归属如下。
+
+## 训练营资料
+
+本包引用 **WaytoAGI 第七期「AI 硬件基础训练营」** 公开课程资料（社区首页与训练营主页），用于提炼学习路径、操作要点与提示词模板。约定：默认可公开、仅限非商业使用。引用均保留来源链接并标注"训练营"来源类型，详见 `references/camp-notes.md` 与 `resources.md`。
+
+- 社区首页（通往 AGI 之路）：https://waytoagi.feishu.cn/wiki/QPe5w5g7UisbEkkow8XcDmOpn8e
+- 训练营主页（第七期 AI 硬件基础训练营）：https://waytoagi.feishu.cn/wiki/YUfhwbwdUiYXtYkCru7cfKaGnWb
+
+## 官方文档
+
+乐鑫 Espressif 官方文档与数据手册（ESP32-S3、ESP-IDF、esptool、硬件设计指南）、Edge Impulse、MDN Web API 文档等，版权归各官方机构所有，本包以链接形式引用。
+
+## 开源项目
+
+乐鑫 esp-idf / esp-dl / esp-who、TensorFlow tflite-micro、xiaozhi-esp32、Serial Studio 等开源项目，版权归各项目作者与许可协议所有，本包以链接形式引用，未复制其受保护代码。
+
+## 本地参考素材
+
+本包参考了用户本地既有 Skill/项目（easyinput-board-cy、easyinput-beatbox 的 course 讲义与协议文档），仅提取方法性要点并注明路径，未复制其正文。
+
+## 隐私声明
+
+本包不含任何个人隐私信息（open_id、手机号、微信号、个人地址等）。
+
+## 非商业声明
+
+本包以 CC BY-NC 4.0 授权（见 LICENSE），训练营资料仅限非商业使用。任何商业用途需另行获得相应权利人授权。

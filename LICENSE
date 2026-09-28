@@ -1,0 +1,26 @@
+# LICENSE
+
+## 本 Skill 包（ai-hardware-dev）
+
+本包内容（SKILL.md、board-reference.md、prompt-templates.md、resources.md、references/ 下全部文件、README.md、NOTICE）以 **知识共享 署名-非商业性使用 4.0 国际（CC BY-NC 4.0）** 授权：
+
+- 您可以在注明出处的前提下，**自由使用、复制、修改、分发**本包内容；
+- **不得用于商业目的**（包括但不限于：售卖本包、用本包内容支撑商业产品/服务、商业培训收费）。
+
+完整法律文本：https://creativecommons.org/licenses/by-nc/4.0/legalcode.zh-hans
+
+## 训练营资料专项约定
+
+本包引用了 WaytoAGI 第七期「AI 硬件基础训练营」的公开课程资料（见 NOTICE 与 references/camp-notes.md）。训练营资料的授权约定为：**默认可公开、仅限非商业使用**。据此：
+
+- 引用训练营资料时保留来源链接与课程名；
+- 任何商业用途需另行获得 WaytoAGI 训练营授权；
+- 本包从训练营文档提取的提示词模板/操作步骤，仅保留"方法性"内容并标注出处，不复制其全部原文。
+
+## 其他第三方内容
+
+本包列出的官方文档、开源项目（乐鑫 ESP-IDF、TFLite Micro、ESP-DL、xiaozhi-esp32 等）与中文社区内容，版权归各自作者所有，仅以链接形式引用，未复制其受保护内容。
+
+## 免责声明
+
+本包为学习与开发辅助资料，命令、参数、价格、交期、认证要求等可能随时间变化，请以对应官方网站当日信息为准；因使用本包造成的任何损失，作者不承担责任。
