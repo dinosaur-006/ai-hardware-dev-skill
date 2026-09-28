@@ -1,0 +1,28 @@
+name: skill-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Board contract schema check (good sample must pass)
+        run: python scripts/check_board_contract.py scripts/examples/board-contract.good.json
+      - name: Board contract schema check (bad sample must fail)
+        run: |
+          python scripts/check_board_contract.py scripts/examples/board-contract.bad.json && exit 1 || exit 0
+      - name: Pin netlist vs contract diff (good must pass)
+        run: python scripts/collect_pins.py scripts/examples/pins.netlist.good.csv scripts/examples/board-contract.good.json
+      - name: Power budget check
+        run: python scripts/power_budget.py scripts/examples/bom.example.csv --rated-ma 1000
+      - name: Flash budget check
+        run: python scripts/check_flash_budget.py scripts/examples/partitions.example.csv --flash-bytes 16M --psram-bytes 8M --tensor-arena-bytes 2M
+      - name: Markdown link check (skip Feishu camp which needs login)
+        run: python scripts/check_markdown_links.py README.md board-reference.md --skip-hosts waytoagi.feishu.cn

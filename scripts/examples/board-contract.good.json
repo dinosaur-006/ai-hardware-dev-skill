@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "board_name": "EasyInput V2.0 (reference example)",
+  "soc": "ESP32-S3",
+  "module": "ESP32-S3-WROOM-1-N16R8",
+  "flash_bytes": 16777216,
+  "psram_bytes": 8388608,
+  "power": {
+    "input": "USB 5V / LiPo via TP4056",
+    "vcc_3v3_regulator": "AMS1117-3.3",
+    "power_up_settle_time_ms": null,
+    "power_up_settle_time_ms_evidence": "unknown_requires_qualification",
+    "max_current_ma": null,
+    "max_current_ma_evidence": "needs_measurement_after_bringup"
+  },
+  "boot": {
+    "enter": "power_on_short_press_boot_once",
+    "exit": "power_off_and_on",
+    "independent_user_reset_button": false,
+    "legacy_hold_boot_during_power_on_forbidden": true
+  },
+  "usb": {
+    "dplus_gpio": "GPIO20",
+    "dminus_gpio": "GPIO19",
+    "native_usb_serial_jtag": true
+  },
+  "pins": {
+    "used": ["GPIO0", "GPIO19", "GPIO20", "GPIO8", "GPIO9", "GPIO10", "GPIO11", "GPIO12", "GPIO13", "GPIO14", "GPIO15", "GPIO16", "GPIO17", "GPIO18", "GPIO21", "GPIO35", "GPIO36", "GPIO37", "GPIO38", "GPIO39", "GPIO40", "GPIO41", "GPIO42", "GPIO43", "GPIO44", "GPIO45", "GPIO46", "GPIO47", "GPIO48"],
+    "reserved": ["GPIO3", "GPIO4", "GPIO5", "GPIO6", "GPIO7", "GPIO22", "GPIO23", "GPIO24", "GPIO25", "GPIO26", "GPIO27", "GPIO28", "GPIO29", "GPIO30", "GPIO31", "GPIO32", "GPIO33", "GPIO34"],
+    "notes": "Reference example only. GPIO8 is the 5V/3.3V shared power-domain switch (EasyInput-specific), NOT a general ESP32-S3 fact. Contract must be rebuilt per board."
+  }
+}

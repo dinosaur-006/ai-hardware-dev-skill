@@ -1,0 +1,8 @@
+name,qty,current_ma,peak_ma
+ESP32-S3-WROOM-1,1,180,500
+INMP441 mic,1,1.4,2
+MAX98357A amp,1,40,500
+WS2812 x4,4,60,80
+I2C sensor,1,1,2
+LED x2,2,10,10
+TP4056 charger,1,1,1
