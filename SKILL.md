@@ -1,6 +1,6 @@
 ---
 name: ai-hardware-dev
-version: 3.0.0
+version: 3.1.0
 description: 零基础 AI 硬件开发全流程指引 + 项目执行系统（AI 辅助开发/vibecoding）。覆盖选型、画板、烧录、联调、排障到产品化闭环，含需求翻译、项目状态、决策留痕、失败知识库与多角色团队模式。用于自制 AI 硬件（"我要做产品"）、从零画板、烧录、软硬件联调、硬件排障、选型、查项目进度、决策留痕、失败沉淀；可单独调用子环节（只烧录/只联调/只画板）。EasyInput V2.0 仅为参考案例板。
 ---
 
@@ -135,16 +135,16 @@ description: 零基础 AI 硬件开发全流程指引 + 项目执行系统（AI 
 - `core/ai-hardware-team.md` — AI 硬件团队多角色模式：PM→硬件架构→电气→固件→QA→制造（"我要做产品"时读）
 - `references/00-direction-and-definition.md` — 方向确定与产品定义
 - `references/00-product-translator.md` — 需求翻译层：人话→工程规格（00 之后、01 之前）
-- `references/01-platform-selection.md` — MCU 级 AI 硬件主线选型（Level1 ESP32-S3 入门 → Level2 STM32+NPU → Level3 树莓派 → Level4 Jetson）
+- `references/01-platform-selection.md` — MCU 级 AI 硬件主线选型（Level1 ESP32-S3 入门 → Level2 STM32+NPU → Level3 树莓派 → Level4 Jetson；含成本反推：目标售价→BOM 目标价→选型约束）
 - `references/02-environment-setup.md` — 环境搭建（ESP-IDF / Arduino / MicroPython / PlatformIO / Node.js）
-- `references/03-schematic-design.md` — 原理图设计（立创EDA / KiCad）
+- `references/03-schematic-design.md` — 原理图设计（立创EDA / KiCad；含电路安全设计：反接/过流/ESD/看门狗 + 轻量 FMEA）
 - `references/03a-breadboard-prototype.md` — 面包板原型：先在面包板验证最小接线方案，再画 PCB（V3 新增）
-- `references/04-pcb-layout.md` — PCB 布局布线
-- `references/05-manufacturing-and-sourcing.md` — 打样与元器件采购（嘉立创等）
-- `references/06-soldering-and-hardware-debug.md` — 焊接与硬件调试
-- `references/07-firmware-ai.md` — 固件开发（含 TFLite Micro / ESP-DL / Edge Impulse AI 推理）
-- `references/08-flashing-and-debugging.md` — 烧录与调试（esptool / idf.py / Arduino / WebSerial）
+- `references/04-pcb-layout.md` — PCB 布局布线（含 DFM 可制造性设计 + 预合规滤波预留）
+- `references/05-manufacturing-and-sourcing.md` — 打样与元器件采购（嘉立创等；含 DFM 下单衔接）
+- `references/06-soldering-and-hardware-debug.md` — 焊接与硬件调试（含锂电池安全与热失控 FMEA）
+- `references/07-firmware-ai.md` — 固件开发（含 TFLite Micro / ESP-DL / Edge Impulse AI 推理；含 OTA 固件升级与版本管理）
+- `references/08-flashing-and-debugging.md` — 烧录与调试（esptool / idf.py / Arduino / WebSerial；含 JTAG 调试：内置 USB-Serial/JTAG + OpenOCD/gdb）
 - `references/09-software-hardware-integration.md` — 软硬件联调（WebSerial / WebBluetooth / 协议）
-- `references/10-productization.md` — 产品化（3D 打印外壳 / 电源 / 认证）
-- `references/11-troubleshooting.md` — 故障排查（分层排查 + 故障库）
+- `references/10-productization.md` — 产品化（3D 打印外壳 / 电源 / 认证；含 OTA 设备管理 / 预合规摸底 / 量产成本反推）
+- `references/11-troubleshooting.md` — 故障排查（分层排查 + 故障库；含安全类故障：看门狗/过流/ESD/锂电池）
 - `references/camp-notes.md` — 训练营资料速览（WaytoAGI 第七期 AI 硬件基础训练营）
